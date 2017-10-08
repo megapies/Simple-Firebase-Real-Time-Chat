@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Test Firebase realtime chat 1</title>
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<style>
+		div.scroll{
+			width: 800px;
+			height: 450px;
+			overflow: scroll;
+		}
+	</style>
+	<meta property="og:image" content="http://i.imgur.com/CIA3Ylk.png"/>
+</head>
+<body>
+
+
+	<div class="container">
+		<h2>Test Firebase realtime chat 1</h2>
+
+		<input typt="text" class="form-control" placeholder="name" id="user-name">
+
+		<input type="text" class="form-control" placeholder="Type it here" id="message">
+		<p>
+			<a href="#" class="btn btn-primary">Submit</a>
+		</p>
+
+		<hr>
+		<div class="scroll" id="list-div">
+			<ul class="List-group"></ul>
+		</div>
+		
+	</div>
+
+	<script src="js/jquery-3.2.1.min.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/4.1.1/firebase.js"></script>
+	<script>
+	 	// Initialize Firebase
+	  	var config = {
+	    	apiKey: "AIzaSyBb14iuaDPstpfQhLR1eoklvSPFGRTxEBE",
+		   	authDomain: "test1-3328f.firebaseapp.com",
+		    databaseURL: "https://test1-3328f.firebaseio.com",
+		    projectId: "test1-3328f",
+		    storageBucket: "test1-3328f.appspot.com",
+		    messagingSenderId: "589181130811"
+	  	};
+	  	firebase.initializeApp(config);
+
+	  	// Get a reference to the database service
+    	var database = firebase.database();
+	</script>
+	<script>
+		$(function() {
+			console.log('ok')
+
+			
+			var button = $("a");
+			var ul = $("ul");
+			var input = document.getElementById("message");
+			var inputName = document.getElementById("user-name");
+			var listDiv = document.getElementById("list-div");
+ 			
+ 	 		listenToFirebase();
+
+			input.addEventListener("keyup", function(event){
+				console.log("keyup");
+				event.preventDefault();
+				if(event.keyCode == 13){
+					send();
+				}
+			})
+			button.click(function(){
+				send();
+			});
+
+			function send(){
+				console.log(inputName);
+				var message = input.value;
+				var name = inputName.value;
+ 				write(name, message);
+ 				input.value = "";
+			}
+
+			function write(name, message){
+				database.ref('comment').push({
+					name : name,
+					message : message
+				});
+			}
+
+			function listenToFirebase(){
+				var commentRef = database.ref("comment");
+				commentRef.on("child_added", function(snapshot){
+					console.log(snapshot.val().name);
+					if(snapshot.val().name != null && snapshot.val().message != null){
+						addToList(snapshot.val().name, snapshot.val().message);
+					}
+				});
+			}
+			function addToList(name, message){
+				var li = '<li class="list-group-item">' + name + " : " + message + '</li>';
+				ul.append(li)
+				listDiv.scrollTop = listDiv.scrollHeight;
+			}
+		});
+	</script>
+</body>
+</html>
